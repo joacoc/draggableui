@@ -1,0 +1,25 @@
+version: "3"
+services:
+  materialized:
+    image: materialize/materialized:v0.24.0
+    container_name: materialized
+    restart: always
+    ports:
+      - 6875:6875
+  back:
+    container_name: back
+    command: sh -c "dockerize -wait tcp://materialized:6875 -timeout 80s npm start"
+    build:
+      context: ./back
+    ports:
+      - 4000:4000
+    depends_on:
+      - materialized
+  front:
+    container_name: front
+    build:
+      context: ./front
+    ports:
+      - 3000:3000
+    depends_on:
+      - back
